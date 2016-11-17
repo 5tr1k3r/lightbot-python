@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -6,6 +8,7 @@ from pygame.locals import *
 from lightbot import game
 
 
+# noinspection PyShadowingNames
 class Vertex:
     def __init__(self, x=0, y=0, z=0):
         self.x = x
@@ -19,6 +22,7 @@ class Vertex:
         return self.x, self.y, self.z
 
 
+# noinspection PyShadowingNames
 class LightbotOpenGLWindow:
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
@@ -27,11 +31,9 @@ class LightbotOpenGLWindow:
     width = 5
     height = 4
 
-    def __init__(self):
-        self.vertices = []
-        self.edges = []
-        self.big_square = None
+    Floor = namedtuple('Floor', 'vertices, edges, big_rect')
 
+    def __init__(self):
         pygame.init()
         display = (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
         pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
@@ -43,33 +45,36 @@ class LightbotOpenGLWindow:
         glRotatef(-4, 1, 0, 0)
         # glEnable(GL_DEPTH_TEST)         # THIS STUFF MAKES THINGS OPAQUE/SOLID!!!!!
 
-        self._prepare_ground()
+        self.ground = self._make_floor(level=0)
+        self.second_floor = self._make_floor(level=1)
 
         self.start_game_cycle()
 
-    def _prepare_ground(self):
-        floor_height = 0
+    def _make_floor(self, level):
+        vertices = []
+        edges = []
 
         for x in range(self.width + 1):
             for y in range(self.height + 1):
-                self.vertices.append(Vertex(x, y, floor_height))
+                vertices.append(Vertex(x, y, level))
         # print(self.vertices)
 
-        self.big_square = (0,
-                           self.vertices.index(Vertex(0, self.height, 0)),
-                           self.vertices.index(Vertex(self.width, self.height, 0)),
-                           self.vertices.index(Vertex(self.width, 0, 0)))
-        print(self.big_square)
+        big_rect = (0,
+                    vertices.index(Vertex(0, self.height, level)),
+                    vertices.index(Vertex(self.width, self.height, level)),
+                    vertices.index(Vertex(self.width, 0, level)))
 
         for i in range(1, self.height):
-            x = self.vertices.index(Vertex(0, i, 0))
-            y = self.vertices.index(Vertex(self.width, i, 0))
-            self.edges.append((x, y))
+            x = vertices.index(Vertex(0, i, level))
+            y = vertices.index(Vertex(self.width, i, level))
+            edges.append((x, y))
 
         for i in range(1, self.width):
-            x = self.vertices.index(Vertex(i, 0, 0))
-            y = self.vertices.index(Vertex(i, self.height, 0))
-            self.edges.append((x, y))
+            x = vertices.index(Vertex(i, 0, level))
+            y = vertices.index(Vertex(i, self.height, level))
+            edges.append((x, y))
+
+        return self.Floor(vertices, edges, big_rect)
 
     @staticmethod
     def _process_events(log=None):
@@ -96,11 +101,12 @@ class LightbotOpenGLWindow:
 
     def start_game_cycle(self):
         while True:
-            self._process_events(log=True)
+            self._process_events()
             self._clear_screen()
 
             # All custom draw functions should go here.
-            self.draw_basic_board()
+            self._draw_floor(self.ground)
+            self._draw_floor(self.second_floor)
             self.draw_current_state()
 
             self._update_screen()
@@ -108,20 +114,21 @@ class LightbotOpenGLWindow:
     def draw_current_state(self):
         pass
 
-    def draw_basic_board(self):
-        self._draw_text(0, 0, 0, 'hey')
+    @staticmethod
+    def _draw_floor(floor):
+        # self._draw_text(0, 0, 0, 'hey')
 
         glBegin(GL_QUADS)
-        glColor3f(0.2, 1, 0.4)
-        for vertex in self.big_square:
-            glVertex3fv(self.vertices[vertex]())
+        glColor3f(0.2, 0.4, 0.4)
+        for vertex in floor.big_rect:
+            glVertex3fv(floor.vertices[vertex]())
         glEnd()
 
         glBegin(GL_LINES)
         glColor3f(0, 0, 0)
-        for edge in self.edges:
+        for edge in floor.edges:
             for vertex in edge:
-                glVertex3fv(self.vertices[vertex]())
+                glVertex3fv(floor.vertices[vertex]())
         glEnd()
 
     @staticmethod
