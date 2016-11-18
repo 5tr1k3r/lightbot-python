@@ -5,7 +5,10 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 
-from lightbot import game
+try:
+    from lightbot import game
+except ImportError:
+    import game
 
 
 # noinspection PyShadowingNames
@@ -43,7 +46,7 @@ class LightbotOpenGLWindow:
         glRotatef(-45.0, 0.0, 0.0, 1.0)
         glRotatef(5, 0, 0, 1)
         glRotatef(-4, 1, 0, 0)
-        # glEnable(GL_DEPTH_TEST)         # THIS STUFF MAKES THINGS OPAQUE/SOLID!!!!!
+        # glEnable(GL_DEPTH_TEST) # THIS STUFF MAKES THINGS OPAQUE/SOLID!
 
         self.ground = self._make_floor(level=0)
         self.second_floor = self._make_floor(level=1)
@@ -136,7 +139,9 @@ class LightbotOpenGLWindow:
     def _draw_text(x, y, z, text):
         position = (x, y, z)
         font = pygame.font.Font(None, 32)
-        text_surface = font.render(text, True, (255, 255, 255, 255), (0, 0, 0, 255))
+        color = (255, 255, 255, 255)
+        background = (0, 0, 0, 255)
+        text_surface = font.render(text, True, color, background)
         text_data = pygame.image.tostring(text_surface, "RGBA", True)
         glRasterPos3d(*position)
         glDrawPixels(text_surface.get_width(), text_surface.get_height(),
