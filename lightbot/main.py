@@ -105,7 +105,7 @@ class LightbotOpenGLWindow:
             self._clear_screen()
 
             # All custom draw functions should go here.
-            self._draw_floor(self.ground)
+            self._draw_floor(self.ground, grid=True)
             self._draw_floor(self.second_floor)
             self.draw_current_state()
 
@@ -115,7 +115,7 @@ class LightbotOpenGLWindow:
         pass
 
     @staticmethod
-    def _draw_floor(floor):
+    def _draw_floor(floor, grid=None):
         # self._draw_text(0, 0, 0, 'hey')
 
         glBegin(GL_QUADS)
@@ -124,12 +124,13 @@ class LightbotOpenGLWindow:
             glVertex3fv(floor.vertices[vertex]())
         glEnd()
 
-        glBegin(GL_LINES)
-        glColor3f(0, 0, 0)
-        for edge in floor.edges:
-            for vertex in edge:
-                glVertex3fv(floor.vertices[vertex]())
-        glEnd()
+        if grid:
+            glBegin(GL_LINES)
+            glColor3f(0, 0, 0)
+            for edge in floor.edges:
+                for vertex in edge:
+                    glVertex3fv(floor.vertices[vertex]())
+            glEnd()
 
     @staticmethod
     def _draw_text(x, y, z, text):
