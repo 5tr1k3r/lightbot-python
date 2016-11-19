@@ -52,7 +52,7 @@ class Floor:
 class LightbotOpenGLWindow:
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
-    SCALE = 1
+    DESIRED_FPS = 100
 
     width = 5
     height = 4
@@ -102,6 +102,10 @@ class LightbotOpenGLWindow:
             glRotatef(1, 0, 1, 0)
         if keys[pygame.K_UP]:
             glRotatef(1, 0, -1, 0)
+        if keys[pygame.K_PAGEUP]:
+            glScalef(0.98, 0.98, 0.98)
+        if keys[pygame.K_PAGEDOWN]:
+            glScalef(1.02, 1.02, 1.02)
 
         # Get event queue and check it for a few specific events
         for event in pygame.event.get():
@@ -124,10 +128,9 @@ class LightbotOpenGLWindow:
     def _clear_screen():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    @staticmethod
-    def _update_screen():
+    def _update_screen(self):
         pygame.display.flip()
-        pygame.time.wait(10)
+        pygame.time.wait(1000 // self.DESIRED_FPS)
 
     def _draw_current_state(self):
         pass
