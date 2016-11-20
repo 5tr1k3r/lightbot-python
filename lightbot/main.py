@@ -1,3 +1,6 @@
+import os
+import sys
+
 import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -6,6 +9,7 @@ from pygame.locals import *
 try:
     from lightbot import game
 except ImportError:
+    # noinspection PyUnresolvedReferences
     import game
 
 
@@ -58,18 +62,27 @@ class LightbotOpenGLWindow:
     height = 4
 
     def __init__(self):
-        pygame.init()
-        display = (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-        # glEnable(GL_DEPTH_TEST)  # THIS STUFF MAKES THINGS OPAQUE/SOLID!
-        self._reset_camera_position()
+        self.init_window()
+        self.reset_camera_position()
 
         self.ground = Floor(self.width, self.height, level=0)
         self.second_floor = Floor(3, 3, level=1)
 
         self.start_game_cycle()
 
-    def _reset_camera_position(self):
+    def init_window(self):
+        if sys.platform in ["win32", "win64"]:
+            os.environ["SDL_VIDEO_CENTERED"] = "1"
+        pygame.init()
+        display = (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+        # THIS STUFF MAKES THINGS OPAQUE/SOLID!
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LEQUAL)
+        glEnable(GL_MULTISAMPLE)
+        # glEnable(GL_LINE_SMOOTH)
+
+    def reset_camera_position(self):
         glLoadIdentity()
         gluPerspective(45, self.WINDOW_WIDTH / self.WINDOW_HEIGHT, 0.1, 50.0)
         glTranslatef(-2, 0, -7)
@@ -106,6 +119,8 @@ class LightbotOpenGLWindow:
             glScalef(0.98, 0.98, 0.98)
         if keys[pygame.K_PAGEDOWN]:
             glScalef(1.02, 1.02, 1.02)
+        if keys[pygame.K_SPACE]:
+            self.pause()
 
         # Get event queue and check it for a few specific events
         for event in pygame.event.get():
@@ -117,12 +132,13 @@ class LightbotOpenGLWindow:
             if event.type == pygame.QUIT or esc_is_pressed:
                 pygame.quit()
                 quit()
-
             if home_is_pressed:
-                self._reset_camera_position()
-
+                self.reset_camera_position()
             if log:
                 print(event)
+
+    def pause(self):
+        pass
 
     @staticmethod
     def _clear_screen():
@@ -176,5 +192,5 @@ class LightbotOpenGLWindow:
 
 
 if __name__ == '__main__':
-    board = game.Board('lightbot/board.txt')
+    board = game.Board('board.txt')
     window = LightbotOpenGLWindow()

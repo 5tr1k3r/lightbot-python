@@ -9,8 +9,7 @@ class Cell:
         self.lit = lit
 
     def __repr__(self):
-        return 'z = {}, active = {}, lit up = {}'.format(self.z, self.active,
-                                                         self.lit)
+        return 'z = {}, active = {}, lit up = {}'.format(self.z, self.active, self.lit)
 
 
 class Board:
@@ -40,5 +39,5 @@ class Board:
 
 
 if __name__ == '__main__':
-    board = Board('lightbot/board.txt')
+    board = Board('board.txt')
     board.draw()
