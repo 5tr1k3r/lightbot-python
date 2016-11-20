@@ -119,6 +119,8 @@ class LightbotOpenGLWindow:
             glScalef(0.98, 0.98, 0.98)
         if keys[pygame.K_PAGEDOWN]:
             glScalef(1.02, 1.02, 1.02)
+        if keys[pygame.K_SPACE]:
+            self.pause()
 
         # Get event queue and check it for a few specific events
         for event in pygame.event.get():
@@ -134,6 +136,9 @@ class LightbotOpenGLWindow:
                 self.reset_camera_position()
             if log:
                 print(event)
+
+    def pause(self):
+        pass
 
     @staticmethod
     def _clear_screen():
