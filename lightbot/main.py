@@ -6,12 +6,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 
-try:
-    from lightbot import game
-except ImportError:
-    # noinspection PyUnresolvedReferences
-    import game
-
+from lightbot import game
 
 # noinspection PyShadowingNames
 class Vertex:
